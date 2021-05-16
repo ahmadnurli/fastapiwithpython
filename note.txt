@@ -3,3 +3,5 @@ API Docs - Swagger/redocs 41:39
 Query parameters 45:56
 Request Body 55:58
 How to Debug 1:03:58
+Pydantic Schema 1:10.46
+Database Connection 1:20:00

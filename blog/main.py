@@ -1,11 +1,9 @@
+from os import stat
 from fastapi import FastAPI, status, Response, HTTPException
 from fastapi.params import Depends
-from starlette.status import HTTP_404_NOT_FOUND
-from . import schemas, models
+from . import models, schemas
 from .database import SessionLocal, engine
 from sqlalchemy.orm import Session
-
-import blog
 
 app = FastAPI()
 
@@ -29,17 +27,30 @@ def create(request: schemas.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
-@app.delete('/blog/{id}', status_code=status.HTTP_200_OK)
+@app.delete('/blog/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def destroy(id, response: Response, db: Session = Depends(get_db)):
-
     blog = db.query(models.Blog).filter(models.Blog.id ==
                                         id).delete(synchronize_session=False)
-    if blog:
-        db.commit()
-        return {'detail': 'Delete is successfully'}
-    else:
+    if not blog:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return {'detail': f'Blog with the id {id} id not available'}
+        return {'message': f'Blog with the id {id} id not available'}
+
+    db.commit()
+    return {'message': 'Delete is successfully'}
+
+
+@app.put('/blog/{id}', status_code=status.HTTP_202_ACCEPTED)
+def update(id, request: schemas.Blog, db: Session = Depends(get_db)):
+    blog = db.query(models.Blog).filter(
+        models.Blog.id == id)
+
+    if not blog.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Blog with id {id} is not found")
+
+    blog.update(request)
+    db.commit()
+    return 'updated'
 
 
 @app.get('/blog')
@@ -57,3 +68,7 @@ def show(id,  response: Response, db: Session = Depends(get_db)):
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return {'message': f'Blog with the id {id} id not available'}
     return blog
+
+
+# if __name__ == '__main__':
+#     uvicorn.run(app, host="127.0.0.1", port=9000)

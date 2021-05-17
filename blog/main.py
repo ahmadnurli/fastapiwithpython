@@ -1,7 +1,7 @@
-from os import stat
+from os import name, stat
 from typing import List
 from fastapi import FastAPI, status, Response, HTTPException
-from fastapi.params import Depends
+from fastapi.params import Body, Depends
 from . import models, schemas
 from .database import SessionLocal, engine
 from sqlalchemy.orm import Session
@@ -49,7 +49,7 @@ def update(id, request: schemas.Blog, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Blog with id {id} is not found")
 
-    blog.update(request)
+    blog.update(title=request.title, body=request.body)
     db.commit()
     return 'updated'
 
@@ -71,5 +71,14 @@ def show(id,  response: Response, db: Session = Depends(get_db)):
     return blog
 
 
-# if __name__ == '__main__':
-#     uvicorn.run(app, host="127.0.0.1", port=9000)
+@app.post('/user')
+def create_user(request: schemas.User, db: Session = Depends(get_db)):
+    new_user = models.User(
+        name=request.name, email=request.email, password=request.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+    # if __name__ == '__main__':
+    #     uvicorn.run(app, host="127.0.0.1", port=9000)

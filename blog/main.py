@@ -1,11 +1,10 @@
-from os import name, stat
 from typing import List
 from fastapi import FastAPI, status, Response, HTTPException
-from fastapi.params import Body, Depends
+from fastapi.params import Depends
 from . import models, schemas
 from .database import SessionLocal, engine
 from sqlalchemy.orm import Session
-
+from .hashing import Hash
 app = FastAPI()
 
 models.Base.metadata.create_all(engine)
@@ -73,8 +72,9 @@ def show(id,  response: Response, db: Session = Depends(get_db)):
 
 @app.post('/user')
 def create_user(request: schemas.User, db: Session = Depends(get_db)):
+
     new_user = models.User(
-        name=request.name, email=request.email, password=request.password)
+        name=request.name, email=request.email, password=Hash.bcrypt(request.password))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

@@ -15,4 +15,4 @@ Response Model 2:08:02
 Create User 2:15:56
 Hash the Password 2:23:08
 Using Docs Tags 2:35:04
-
+Relationships 2:37:58

@@ -29,6 +29,19 @@ def create(request: schemas.Blog, db: Session = Depends(get_db)):
     return new_blog
 
 
+@app.delete('/blog/{id}', status_code=status.HTTP_200_OK)
+def destroy(id, response: Response, db: Session = Depends(get_db)):
+
+    blog = db.query(models.Blog).filter(models.Blog.id ==
+                                        id).delete(synchronize_session=False)
+    if blog:
+        db.commit()
+        return {'detail': 'Delete is successfully'}
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {'detail': f'Blog with the id {id} id not available'}
+
+
 @app.get('/blog')
 def all(db: Session = Depends(get_db)):
     blogs = db.query(models.Blog).all()

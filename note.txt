@@ -9,4 +9,5 @@ Model & Table 1:25:38
 Store blog to Database 1:33:27
 Get blogs from Database 1:38:52
 Exception $ Status Code 1:43:29
+Delete a blog 1:53:46
 
